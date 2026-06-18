@@ -1,26 +1,155 @@
-/* --- NOVOS ESTILOS PARA O MODO EDIÇÃO --- */
-
-.header-actions {
-    display: flex;
-    gap: 0.5rem;
+/* Variáveis de Cores (Tema Claro) */
+:root {
+    --bg-color: #f4f6f9;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --text-secondary: #666666;
+    --header-bg: #1e293b;
+    --header-text: #ffffff;
+    --accent-color: #2563eb;
+    --border-color: #e2e8f0;
 }
 
-.btn-secondary {
-    background-color: #475569;
+/* Variáveis para Tema Escuro */
+[data-theme="dark"] {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --text-secondary: #94a3b8;
+    --header-bg: #020617;
+    --accent-color: #3b82f6;
+    --border-color: #334155;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-theme {
+    background-color: var(--accent-color);
     color: white;
     border: none;
     padding: 0.6rem 1.2rem;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.block-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+/* Cabeçalho interno do bloco (Título + Engrenagem) */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+}
+
+.btn-block-edit {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 4px;
     transition: background-color 0.2s;
 }
 
-.btn-secondary.active {
-    background-color: #dc2626; /* Fica vermelho quando ativo */
+.btn-block-edit:hover {
+    background-color: var(--border-color);
 }
 
-/* Formulário de Edição dentro do Card */
+.link-list {
+    list-style: none;
+}
+
+.link-item {
+    margin-bottom: 0.75rem;
+}
+
+.link-item-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.link-item-wrapper a {
+    flex: 1;
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-color);
+    border-radius: 4px;
+    border-left: 4px solid var(--accent-color);
+    transition: transform 0.2s;
+}
+
+.link-item-wrapper a:hover {
+    transform: translateX(4px);
+}
+
+/* Botão de deletar link individual */
+.btn-delete {
+    display: none; /* Escondido por padrão */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+/* Formulário de adição de links */
 .edit-form {
     display: none; /* Escondido por padrão */
     margin-top: 1rem;
@@ -28,11 +157,6 @@
     border-top: 1px dashed var(--border-color);
     flex-direction: column;
     gap: 0.5rem;
-}
-
-/* Exibe o formulário apenas quando o body tiver a classe .edit-mode */
-body.edit-mode .edit-form {
-    display: flex;
 }
 
 .edit-form input {
@@ -52,33 +176,21 @@ body.edit-mode .edit-form {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.85rem;
 }
 
-/* Alinhamento do Link com o botão de Deletar */
-.link-item-wrapper {
+/* REGRAS ATIVADAS APENAS QUANDO O BLOCO ESTIVER EM EDIÇÃO */
+.block-card.editing .edit-form {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
 }
 
-.link-item-wrapper a {
-    flex: 1;
-}
-
-.btn-delete {
-    display: none; /* Escondido por padrão */
-    background: none;
-    border: none;
-    color: #ef4444;
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0 0.3rem;
-    line-height: 1;
-}
-
-/* Exibe o botão X apenas no modo edição */
-body.edit-mode .btn-delete {
+.block-card.editing .btn-delete {
     display: inline-block;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
 }
