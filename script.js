@@ -1,10 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("hub-links");
     const themeToggle = document.getElementById("theme-toggle");
-    const editToggle = document.getElementById("edit-toggle");
     
     let hubData = null;
-    let editMode = false;
 
     // 1. Controle de Tema (Claro/Escuro)
     const savedTheme = localStorage.getItem("theme") || "light";
@@ -17,22 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("theme", newTheme);
     });
 
-    // 2. Controle do Modo Edição
-    editToggle.addEventListener("click", () => {
-        editMode = !editMode;
-        document.body.classList.toggle("edit-mode", editMode);
-        editToggle.classList.toggle("active", editMode);
-        editToggle.textContent = editMode ? "💾 Sair da Edição" : "⚙️ Modo Edição";
-    });
-
-    // 3. Inicialização dos Dados (Carrega do LocalStorage ou do arquivo JSON)
+    // 2. Inicialização dos Dados (LocalStorage ou arquivos locais)
     const localData = localStorage.getItem("hub_links_data");
     
     if (localData) {
         hubData = JSON.parse(localData);
         renderHub();
     } else {
-        // Se for o primeiro acesso, puxa as categorias do arquivo original
         fetch("links.json")
             .then(response => response.json())
             .then(data => {
@@ -40,12 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem("hub_links_data", JSON.stringify(data));
                 renderHub();
             })
-            .catch(error => {
-                console.error("Erro ao carregar dados iniciais:", error);
-            });
+            .catch(error => console.error("Erro ao carregar dados:", error));
     }
 
-    // 4. Função para desenhar a interface na tela
+    // 3. Renderização da Tela
     function renderHub() {
         container.innerHTML = "";
         if (!hubData) return;
@@ -57,14 +44,31 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = document.createElement("section");
             card.classList.add("block-card");
 
+            // Criar o cabeçalho interno do bloco (Título + Botão de Engrenagem)
+            const cardHeader = document.createElement("div");
+            cardHeader.classList.add("card-header");
+
             const title = document.createElement("h2");
             title.textContent = categoria;
-            card.appendChild(title);
+            cardHeader.appendChild(title);
 
+            const btnBlockEdit = document.createElement("button");
+            btnBlockEdit.classList.add("btn-block-edit");
+            btnBlockEdit.textContent = "⚙️";
+            btnBlockEdit.title = "Editar este bloco";
+            btnBlockEdit.addEventListener("click", () => {
+                // Alterna o modo edição apenas para ESTE bloco card
+                card.classList.toggle("editing");
+                btnBlockEdit.textContent = card.classList.contains("editing") ? "✅" : "⚙️";
+            });
+            
+            cardHeader.appendChild(btnBlockEdit);
+            card.appendChild(cardHeader);
+
+            // Lista de links
             const ul = document.createElement("ul");
             ul.classList.add("link-list");
 
-            // Listar os links atuais da categoria
             links.forEach((link, index) => {
                 const li = document.createElement("li");
                 li.classList.add("link-item");
@@ -78,16 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 a.rel = "noopener noreferrer";
                 a.textContent = link.nome;
 
-                // Criar o botão de excluir (❌)
                 const btnDelete = document.createElement("button");
                 btnDelete.classList.add("btn-delete");
                 btnDelete.innerHTML = "🗑️";
-                btnDelete.title = "Excluir este link";
+                btnDelete.title = "Excluir link";
                 btnDelete.addEventListener("click", () => {
                     if (confirm(`Remover o link "${link.nome}"?`)) {
-                        hubData[categoria].splice(index, 1); // Remove da lista
-                        localStorage.setItem("hub_links_data", JSON.stringify(hubData)); // Salva
-                        renderHub(); // Atualiza a tela
+                        hubData[categoria].splice(index, 1);
+                        localStorage.setItem("hub_links_data", JSON.stringify(hubData));
+                        renderHub();
                     }
                 });
 
@@ -96,16 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 li.appendChild(wrapper);
                 ul.appendChild(li);
             });
-
             card.appendChild(ul);
 
-            // Criar o Formulário de Inclusão rápido
+            // Formulário de inserção rápida (aparecerá abaixo dos links ao clicar na engrenagem)
             const form = document.createElement("div");
             form.classList.add("edit-form");
 
             const inputNome = document.createElement("input");
             inputNome.type = "text";
-            inputNome.placeholder = "Nome do item (ex: Planilha 2026)";
+            inputNome.placeholder = "Nome do item (Ex: Relatório Mensal)";
 
             const inputUrl = document.createElement("input");
             inputUrl.type = "url";
@@ -113,23 +115,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const btnAdd = document.createElement("button");
             btnAdd.classList.add("btn-add");
-            btnAdd.textContent = "＋ Incluir no Bloco";
+            btnAdd.textContent = "＋ Incluir Link";
             btnAdd.addEventListener("click", () => {
                 const nomeValor = inputNome.value.trim();
                 const urlValor = inputUrl.value.trim();
 
                 if (!nomeValor || !urlValor) {
-                    alert("Por favor, preencha o Nome e a URL do link!");
+                    alert("Preencha o Nome e a URL!");
                     return;
                 }
 
-                // Adiciona o novo link no array correspondente
-                hubData[categoria].push({
-                    nome: nomeValor,
-                    url: urlValor
-                });
-
-                // Salva na memória do navegador e atualiza
+                hubData[categoria].push({ nome: nomeValor, url: urlValor });
                 localStorage.setItem("hub_links_data", JSON.stringify(hubData));
                 renderHub();
             });
